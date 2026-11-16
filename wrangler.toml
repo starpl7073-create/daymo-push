@@ -13,4 +13,4 @@ DAYMO_ORIGIN = "https://daymo-v369-preview-eb6e.starpl7073.chatgpt.site"
 [[d1_databases]]
 binding = "DB"
 database_name = "daymo-push"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "bed87ad8-c8c4-4f2e-bc64-93bcc8d2b472"
