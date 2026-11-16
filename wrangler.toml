@@ -1,0 +1,16 @@
+name = "daymo-push"
+main = "worker.mjs"
+compatibility_date = "2026-11-16"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+DAYMO_ORIGIN = "https://daymo-v369-preview-eb6e.starpl7073.chatgpt.site"
+
+# Replace with the database ID from the DAYMO D1 database.
+[[d1_databases]]
+binding = "DB"
+database_name = "daymo-push"
+database_id = "00000000-0000-0000-0000-000000000000"
