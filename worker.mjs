@@ -82,14 +82,29 @@ async function deliver(env, now) {
         method: 'POST', headers: details.headers, body: details.body,
         redirect: 'error', signal: AbortSignal.timeout(8000),
       });
+      if (!response.ok) {
+        const payload = await response.clone().json().catch(() => null);
+        const knownReasons = ['BadJwtToken', 'BadVapidToken', 'VapidPkHashMismatch',
+          'BadAuthorization', 'BadTtl', 'BadWebPushRequest', 'BadWebPushTopic',
+          'PayloadTooLarge', 'TooManyRequests', 'BadDeviceToken', 'Unregistered'];
+        console.warn('DAYMO push provider rejected delivery', {
+          status: response.status,
+          reason: knownReasons.includes(payload?.reason) ? payload.reason : undefined,
+        });
+      }
       if (response.ok) {
         await env.DB.prepare('UPDATE jobs SET sent = 1 WHERE device = ? AND id = ? AND available = ?')
           .bind(job.device, job.id, job.available).run();
       } else if (response.status === 404 || response.status === 410) {
         await env.DB.prepare('DELETE FROM jobs WHERE device = ?').bind(job.device).run();
       }
-    } catch {
+    } catch (error) {
       // The lease allows transient failures to retry while the reminder is fresh.
+      const knownErrors = ['TypeError', 'RangeError', 'TimeoutError', 'AbortError',
+        'OperationError', 'NotSupportedError'];
+      console.warn('DAYMO push delivery raised an error', {
+        type: knownErrors.includes(error?.name) ? error.name : 'Error',
+      });
     }
   }
   await env.DB.prepare('DELETE FROM jobs WHERE due < ?').bind(now - day).run();
